@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Link — De La Salle University Dasmarinas Basic Education Department</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #1a4a2e;
+    --green-mid: #2d7a4f;
+    --green-accent: #3da86e;
+    --green-light: #e8f5ee;
+    --gold: #c9a84c;
+    --gold-light: #f5e9c8;
+    --white: #ffffff;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-400: #9ca3af;
+    --gray-600: #4b5563;
+    --gray-800: #1f2937;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --sidebar-w: 240px;
+    --topbar-h: 60px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--gray-100); color: var(--gray-800); overflow-x: hidden; }
+
+  /* ─── LOGIN ─── */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 1000;
+    background: linear-gradient(135deg, var(--green-dark) 0%, #0d2e1c 60%, #0a1f14 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-card {
+    background: var(--white); border-radius: 20px; padding: 48px 44px;
+    width: 420px; max-width: 95vw; box-shadow: 0 40px 80px rgba(0,0,0,.4);
+  }
+  .login-logo { text-align: center; margin-bottom: 28px; }
+  .login-logo .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 64px; height: 64px; border-radius: 16px;
+    background: var(--green-dark); color: var(--gold); font-size: 28px;
+    font-family: 'Playfair Display', serif; margin-bottom: 12px;
+  }
+  .login-logo h1 { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--green-dark); line-height: 1.1; }
+  .login-logo p { font-size: 13px; color: var(--gray-400); margin-top: 4px; }
+  .login-divider { height: 1px; background: var(--gray-200); margin: 20px 0; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px; }
+  .form-group input {
+    width: 100%; padding: 11px 14px; border: 2px solid var(--gray-200);
+    border-radius: 10px; font-size: 15px; font-family: inherit; transition: border-color .2s;
+  }
+  .form-group input:focus { outline: none; border-color: var(--green-accent); }
+  .login-btn {
+    width: 100%; padding: 13px; background: var(--green-dark); color: var(--white);
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: background .2s; margin-top: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .login-btn:hover { background: var(--green-mid); }
+  .login-btn:disabled { background: var(--gray-400); cursor: not-allowed; }
+  .login-error { color: var(--red); font-size: 13px; margin-top: 10px; text-align: center; display: none; }
+  .login-footer { text-align: center; font-size: 12px; color: var(--gray-400); margin-top: 20px; }
+
+  /* ─── LOADING SPINNER ─── */
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── SYNC INDICATOR ─── */
+  .sync-bar {
+    position: fixed; top: var(--topbar-h); left: var(--sidebar-w); right: 0;
+    background: var(--gold); color: white; font-size: 12px; font-weight: 600;
+    text-align: center; padding: 6px; z-index: 80; display: none;
+  }
+  .sync-bar.show { display: block; }
+
+  /* ─── APP SHELL ─── */
+  #app { display: none; }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+    background: var(--green-dark); display: flex; align-items: center;
+    padding: 0 20px; z-index: 100; gap: 16px;
+  }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; color: var(--white); text-decoration: none; }
+  .topbar-brand .t-logo { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); }
+  .topbar-brand .t-sub { font-size: 12px; color: rgba(255,255,255,.6); }
+  .topbar-spacer { flex: 1; }
+  .topbar-user { display: flex; align-items: center; gap: 10px; color: var(--white); }
+  .topbar-user .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--green-accent); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: var(--white); border: 2px solid rgba(255,255,255,.3);
+  }
+  .topbar-user .uname { font-size: 14px; font-weight: 500; }
+  .topbar-user .urole { font-size: 11px; color: rgba(255,255,255,.55); }
+  .logout-btn {
+    margin-left: 8px; padding: 6px 14px; background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2); border-radius: 8px; color: var(--white);
+    font-size: 13px; font-family: inherit; cursor: pointer; transition: background .2s;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,.22); }
+  .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; margin-left: 4px; box-shadow: 0 0 0 2px rgba(74,222,128,.3); }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+    width: var(--sidebar-w); background: var(--white);
+    border-right: 1px solid var(--gray-200); overflow-y: auto;
+    display: flex; flex-direction: column; z-index: 90;
+  }
+  .sidebar-nav { padding: 16px 12px; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500;
+    color: var(--gray-600); transition: all .15s; margin-bottom: 2px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-item:hover { background: var(--green-light); color: var(--green-dark); }
+  .nav-item.active { background: var(--green-dark); color: var(--white); }
+  .sidebar-footer {
+    padding: 16px; border-top: 1px solid var(--gray-200);
+    font-size: 11px; color: var(--gray-400); text-align: center; line-height: 1.5;
+  }
+  .sidebar-footer strong { color: var(--green-mid); }
+  .sidebar-sync { padding: 10px 16px; font-size: 11px; color: var(--gray-400); text-align: center; border-top: 1px solid var(--gray-100); }
+  .sidebar-sync span { color: var(--green-accent); font-weight: 600; }
+
+  /* ─── MAIN CONTENT ─── */
+  .main {
+    margin-left: var(--sidebar-w); margin-top: var(--topbar-h);
+    padding: 28px 32px; min-height: calc(100vh - var(--topbar-h));
+  }
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .page-title { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--green-dark); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--gray-400); margin-bottom: 24px; }
+
+  /* ─── CARDS ─── */
+  .card { background: var(--white); border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); padding: 24px; margin-bottom: 20px; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--green-dark); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+
+  /* ─── DASHBOARD STATS ─── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--white); border-radius: 14px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border-left: 4px solid var(--green-accent); }
+  .stat-card .stat-num { font-size: 30px; font-weight: 700; color: var(--green-dark); }
+  .stat-card .stat-lbl { font-size: 13px; color: var(--gray-400); margin-top: 2px; }
+  .stat-card.gold { border-left-color: var(--gold); }
+  .stat-card.blue { border-left-color: var(--blue); }
+  .stat-card.red { border-left-color: var(--red); }
+
+  /* ─── ANNOUNCEMENTS ─── */
+  .announce-composer { background: var(--white); border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .announce-composer textarea {
+    width: 100%; border: 2px solid var(--gray-200); border-radius: 10px;
+    padding: 12px; font-family: inherit; font-size: 14px; resize: none; min-height: 80px; transition: border-color .2s;
+  }
+  .announce-composer textarea:focus { outline: none; border-color: var(--green-accent); }
+  .composer-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+  .img-preview-wrap { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .img-preview-item { position: relative; }
+  .img-preview-item img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid var(--gray-200); }
+  .img-preview-item .remove-img {
+    position: absolute; top: -6px; right: -6px; background: var(--red); color: white;
+    border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer;
+    font-size: 12px; display: flex; align-items: center; justify-content: center;
+  }
+  .caption-input { width: 100%; border: 1px solid var(--gray-200); border-radius: 8px; padding: 8px 10px; font-family: inherit; font-size: 13px; margin-top: 6px; }
+  .caption-input:focus { outline: none; border-color: var(--green-accent); }
+
+  .btn { padding: 9px 18px; border-radius: 9px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-primary { background: var(--green-dark); color: var(--white); }
+  .btn-primary:hover:not(:disabled) { background: var(--green-mid); }
+  .btn-secondary { background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--gray-200); }
+  .btn-secondary:hover:not(:disabled) { background: var(--gray-200); }
+  .btn-danger { background: #fee2e2; color: var(--red); }
+  .btn-danger:hover { background: #fecaca; }
+  .btn-gold { background: var(--gold); color: var(--white); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .file-label { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; background: var(--green-light); color: var(--green-dark); border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background .15s; }
+  .file-label:hover { background: #d0eddb; }
+  .spacer { flex: 1; }
+
+  /* Post card */
+  .post-card { background: var(--white); border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 18px; overflow: hidden; }
+  .post-header { display: flex; align-items: center; gap: 12px; padding: 16px 20px 10px; }
+  .post-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--green-dark); color: var(--gold); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+  .post-meta .post-author { font-weight: 700; font-size: 14px; color: var(--green-dark); }
+  .post-meta .post-time { font-size: 12px; color: var(--gray-400); }
+  .post-body { padding: 0 20px 12px; font-size: 14px; color: var(--gray-800); line-height: 1.6; }
+  .post-images { display: grid; gap: 3px; margin-bottom: 4px; }
+  .post-images.one img { width: 100%; max-height: 400px; object-fit: cover; }
+  .post-images.two { grid-template-columns: 1fr 1fr; }
+  .post-images.two img, .post-images.many img { width: 100%; height: 200px; object-fit: cover; }
+  .post-images.many { grid-template-columns: repeat(3, 1fr); }
+  .post-caption { padding: 8px 20px; font-size: 13px; color: var(--gray-600); font-style: italic; }
+  .post-footer { padding: 10px 20px; border-top: 1px solid var(--gray-100); display: flex; gap: 12px; }
+  .feed-loading { text-align: center; padding: 40px; color: var(--gray-400); }
+
+  /* ─── FORMS ─── */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-field { margin-bottom: 16px; }
+  .form-field label { display: block; font-size: 12px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%; padding: 10px 13px; border: 2px solid var(--gray-200);
+    border-radius: 9px; font-family: inherit; font-size: 14px; transition: border-color .2s;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--green-accent); }
+  .form-field textarea { resize: vertical; min-height: 90px; }
+  .star-rating { display: flex; gap: 6px; }
+  .star { font-size: 28px; cursor: pointer; color: var(--gray-200); transition: color .15s; }
+  .star.lit { color: var(--gold); }
+
+  /* ─── TABLE ─── */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tbl th { background: var(--green-dark); color: var(--white); padding: 11px 14px; text-align: left; font-size: 12px; letter-spacing: .5px; }
+  .tbl td { padding: 11px 14px; border-bottom: 1px solid var(--gray-100); }
+  .tbl tr:last-child td { border-bottom: none; }
+  .tbl tr:hover td { background: var(--gray-50); }
+  .badge-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .pill-green { background: #d1fae5; color: #065f46; }
+  .pill-yellow { background: #fef3c7; color: #92400e; }
+  .pill-red { background: #fee2e2; color: #991b1b; }
+  .pill-blue { background: #dbeafe; color: #1e40af; }
+
+  /* ─── COUNCIL INFO ─── */
+  .member-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 16px; }
+  .member-card { text-align: center; padding: 20px 12px; background: var(--white); border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .member-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--green-dark); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+  .member-name { font-weight: 700; font-size: 14px; color: var(--green-dark); }
+  .member-role { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  /* ─── CHAT ─── */
+  .chat-window { background: var(--gray-50); border-radius: 12px; min-height: 300px; max-height: 400px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+  .chat-bubble { max-width: 70%; padding: 11px 15px; border-radius: 14px; font-size: 14px; line-height: 1.5; }
+  .chat-bubble.sent { background: var(--green-dark); color: var(--white); align-self: flex-end; border-bottom-right-radius: 4px; }
+  .chat-bubble.recv { background: var(--white); color: var(--gray-800); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .chat-bubble .chat-meta { font-size: 10px; opacity: .6; margin-top: 4px; }
+  .chat-compose { display: flex; gap: 10px; }
+  .chat-compose input { flex: 1; padding: 11px 14px; border: 2px solid var(--gray-200); border-radius: 10px; font-family: inherit; font-size: 14px; }
+  .chat-compose input:focus { outline: none; border-color: var(--green-accent); }
+
+  /* ─── SETTINGS ─── */
+  .settings-wrap { max-width: 480px; }
+
+  /* ─── RESOURCES ─── */
+  .resource-list { display: flex; flex-direction: column; gap: 10px; }
+  .resource-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--white); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .resource-icon { font-size: 24px; }
+  .resource-info .res-name { font-weight: 700; font-size: 14px; color: var(--green-dark); }
+  .resource-info .res-desc { font-size: 12px; color: var(--gray-400); }
+  .res-dl { margin-left: auto; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 500; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: var(--white); border-radius: 16px; padding: 32px; width: 440px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--green-dark); margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--gray-400); margin-bottom: 20px; }
+
+  /* ─── ADMIN TABS ─── */
+  .admin-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+  .tab-btn { padding: 8px 18px; border-radius: 9px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border: 2px solid var(--gray-200); background: var(--white); color: var(--gray-600); transition: all .15s; }
+  .tab-btn.active { background: var(--green-dark); color: var(--white); border-color: var(--green-dark); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── TOAST ─── */
+  #toast { position: fixed; bottom: 28px; right: 28px; background: var(--green-dark); color: var(--white); padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 500; z-index: 900; transform: translateY(100px); opacity: 0; transition: all .3s; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.error { background: var(--red); }
+
+  /* ─── ERROR BANNER ─── */
+  .err-banner { background: #fee2e2; color: #991b1b; padding: 12px 18px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; }
+  .err-banner.show { display: block; }
+
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+  .hidden { display: none !important; }
+  .full-w { grid-column: 1 / -1; }
+  .mt-2 { margin-top: 8px; }
+  .mt-4 { margin-top: 16px; }
+  .flex-end { display: flex; justify-content: flex-end; }
+  .gap-2 { gap: 8px; }
+  .empty-state { color: var(--gray-400); font-size: 13px; padding: 20px 0; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- ═══════ LOGIN ═══════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="badge">PL</div>
+      <h1>Project Link</h1>
+      <p>Student Wellness &amp; Council Portal — La Salle Senior High</p>
+    </div>
+    <div class="login-divider"></div>
+    <div id="login-err-banner" class="err-banner">⚠ Invalid username or password.</div>
+    <div class="form-group"><label>Username</label><input type="text" id="login-user" placeholder="e.g. student01" autocomplete="off" /></div>
+    <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="Enter password" /></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-footer">La Salle Senior High School · SWC Portal</div>
+  </div>
+</div>
+
+<!-- ═══════ APP ═══════ -->
+<div id="app">
+
+  <div class="topbar">
+    <div class="topbar-brand">
+      <span class="t-logo">PL</span>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#fff;">Project Link</div>
+        <div class="t-sub">La Salle Senior High</div>
+      </div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-user">
+      <div class="avatar" id="top-avatar">S</div>
+      <div>
+        <div class="uname" id="top-name">Student</div>
+        <div class="urole" id="top-role">Student</div>
+      </div>
+      <div class="online-dot" title="Connected to GSheets"></div>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-sync" id="sidebar-sync">🔗 Connected to <span>Google Sheets</span></div>
+    <div class="sidebar-footer">Website created by<br /><strong>ANIMO Spear</strong></div>
+  </div>
+
+  <div class="main">
+
+    <!-- HOME / ANNOUNCEMENTS -->
+    <div class="page active" id="page-home">
+      <div class="page-title">📢 Announcements</div>
+      <div class="page-sub">Latest news and updates from the Student Council</div>
+      <div class="announce-composer hidden" id="announce-composer">
+        <div style="font-weight:bold;font-size:14px;color:var(--green-dark);margin-bottom:10px;">📝 Create Announcement</div>
+        <textarea id="post-text" placeholder="What's the announcement?"></textarea>
+        <div class="img-preview-wrap" id="img-previews"></div>
+        <div class="composer-actions">
+          <label class="file-label" for="post-imgs">📎 Attach Images</label>
+          <input type="file" id="post-imgs" accept="image/*" multiple style="display:none;" onchange="previewImgs(this)" />
+          <div class="spacer"></div>
+          <button class="btn btn-primary" id="post-btn" onclick="publishPost()">🚀 Post</button>
+        </div>
+      </div>
+      <div id="feed-loading" class="feed-loading"><div class="spinner" style="width:24px;height:24px;border:3px solid #e5e7eb;border-top-color:var(--green-accent);"></div><br>Loading announcements…</div>
+      <div id="posts-feed"></div>
+    </div>
+
+    <!-- REPORT A CONCERN -->
+    <div class="page" id="page-concern">
+      <div class="page-title">🔔 Report a Concern</div>
+      <div class="page-sub">Voice out issues — synced to Google Sheets</div>
+      <div class="card">
+        <div class="form-row">
+          <div class="form-field"><label>Your Name</label><input type="text" id="c-name" placeholder="Full name (or leave blank for anonymous)" /></div>
+          <div class="form-field"><label>Category</label>
+            <select id="c-cat">
+              <option>Academic</option><option>Facilities</option>
+              <option>Student Services</option><option>Events</option><option>Others</option>
+            </select>
+          </div>
+          <div class="form-field full-w"><label>Concern</label><textarea id="c-body" placeholder="Describe your concern in detail..."></textarea></div>
+          <div class="form-field"><label>Urgency</label>
+            <select id="c-urgency"><option>Low</option><option>Medium</option><option>High</option></select>
+          </div>
+          <div class="form-field"><label>Anonymous?</label>
+            <select id="c-anon"><option value="no">No — include my name</option><option value="yes">Yes — submit anonymously</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="concern-btn" onclick="submitConcern()">Submit Concern</button>
+      </div>
+      <div class="card" id="my-concerns-card">
+        <div class="card-title">📋 My Submissions</div>
+        <div style="overflow-x:auto;">
+          <table class="tbl"><thead><tr><th>Date</th><th>Category</th><th>Status</th><th>Preview</th></tr></thead>
+          <tbody id="my-concerns-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENT EVALUATION -->
+    <div class="page" id="page-eval">
+      <div class="page-title">⭐ Event Evaluation</div>
+      <div class="page-sub">Rate and review student council events — synced to Google Sheets</div>
+      <div class="card">
+        <div class="form-row">
+          <div class="form-field"><label>Event Name</label>
+            <select id="ev-name">
+              <option>Foundation Day 2026</option><option>Science Fair</option>
+              <option>Leadership Summit</option><option>Sports Fest</option>
+            </select>
+          </div>
+          <div class="form-field"><label>Date Attended</label><input type="date" id="ev-date" /></div>
+          <div class="form-field full-w"><label>Overall Rating</label>
+            <div class="star-rating" id="star-rating">
+              <span class="star" data-v="1" onclick="setStar(1)">★</span>
+              <span class="star" data-v="2" onclick="setStar(2)">★</span>
+              <span class="star" data-v="3" onclick="setStar(3)">★</span>
+              <span class="star" data-v="4" onclick="setStar(4)">★</span>
+              <span class="star" data-v="5" onclick="setStar(5)">★</span>
+            </div>
+          </div>
+          <div class="form-field full-w"><label>Comments</label><textarea id="ev-comment" placeholder="Share your thoughts about the event..."></textarea></div>
+        </div>
+        <button class="btn btn-primary" id="eval-btn" onclick="submitEval()">Submit Evaluation</button>
+      </div>
+    </div>
+
+    <!-- TALK TO ADVISER -->
+    <div class="page" id="page-adviser">
+      <div class="page-title">💬 Talk to Adviser</div>
+      <div class="page-sub">Send a message to your SWC teacher</div>
+      <div class="card">
+        <div class="form-field"><label>Select Adviser</label>
+          <select id="adviser-sel">
+            <option>Ms. Santos — SWC Moderator</option>
+            <option>Mr. Reyes — Grade 11 Adviser</option>
+            <option>Ms. Cruz — Grade 12 Adviser</option>
+          </select>
+        </div>
+        <div class="chat-window" id="chat-window"></div>
+        <div class="chat-compose">
+          <input type="text" id="chat-input" placeholder="Type your message…" onkeydown="if(event.key==='Enter')sendChat()" />
+          <button class="btn btn-primary" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COUNCIL INFO -->
+    <div class="page" id="page-council">
+      <div class="page-title">🏛 Meet the Student Council</div>
+      <div class="page-sub">Your representatives for SY 2025–2026</div>
+      <div class="card">
+        <div class="card-title">Executive Officers</div>
+        <div class="member-grid" id="member-grid"></div>
+      </div>
+    </div>
+
+    <!-- RESOURCES -->
+    <div class="page" id="page-resources">
+      <div class="page-title">📁 Resources &amp; Forms</div>
+      <div class="page-sub">Docs, downloads, and centralized files</div>
+      <div class="resource-list" id="resource-list"></div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div class="page" id="page-admin">
+      <div class="page-title">🛠 Admin Dashboard</div>
+      <div class="page-sub">Full access — live data from Google Sheets</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="stat-concerns">–</div><div class="stat-lbl">Concerns Submitted</div></div>
+        <div class="stat-card gold"><div class="stat-num" id="stat-evals">–</div><div class="stat-lbl">Event Evaluations</div></div>
+        <div class="stat-card blue"><div class="stat-num" id="stat-posts">–</div><div class="stat-lbl">Announcements</div></div>
+        <div class="stat-card red"><div class="stat-num">3</div><div class="stat-lbl">Active Users</div></div>
+      </div>
+      <div style="text-align:right;margin-bottom:12px;">
+        <button class="btn btn-secondary btn-sm" onclick="refreshAdmin()">🔄 Refresh from Sheets</button>
+      </div>
+      <div class="admin-tabs">
+        <button class="tab-btn active" onclick="switchTab('concerns',this)">📋 Concerns</button>
+        <button class="tab-btn" onclick="switchTab('evals',this)">⭐ Evaluations</button>
+        <button class="tab-btn" onclick="switchTab('users',this)">👤 Users</button>
+      </div>
+      <div class="tab-panel active" id="tab-concerns">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tbl" id="admin-concerns-tbl">
+              <thead><tr><th>Date</th><th>Name</th><th>Category</th><th>Urgency</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="admin-concerns-body"><tr><td colspan="6" class="empty-state">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel" id="tab-evals">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tbl">
+              <thead><tr><th>Date</th><th>Event</th><th>Rating</th><th>Comment</th><th>Submitted By</th></tr></thead>
+              <tbody id="admin-evals-body"><tr><td colspan="5" class="empty-state">Loading…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="tab-panel" id="tab-users">
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="tbl">
+              <thead><tr><th>Username</th><th>Display Name</th><th>Role</th></tr></thead>
+              <tbody>
+                <tr><td><code>student01</code></td><td>Juan dela Cruz</td><td><span class="badge-pill pill-green">Student</span></td></tr>
+                <tr><td><code>council01</code></td><td>Maria Santos</td><td><span class="badge-pill pill-blue">Student Council</span></td></tr>
+                <tr><td><code>admin</code></td><td>Administrator</td><td><span class="badge-pill pill-red">Admin</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COUNCIL DASHBOARD -->
+    <div class="page" id="page-council-dash">
+      <div class="page-title">📊 Council Dashboard</div>
+      <div class="page-sub">Manage submitted concerns — live from Google Sheets</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num" id="cs-stat-concerns">–</div><div class="stat-lbl">Open Concerns</div></div>
+        <div class="stat-card gold"><div class="stat-num" id="cs-stat-evals">–</div><div class="stat-lbl">Evaluations</div></div>
+      </div>
+      <div style="text-align:right;margin-bottom:12px;">
+        <button class="btn btn-secondary btn-sm" onclick="refreshCouncil()">🔄 Refresh</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Submitted Concerns</div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Name</th><th>Category</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="council-concerns-body"><tr><td colspan="5" class="empty-state">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <div class="page-title">⚙ Settings</div>
+      <div class="page-sub">Manage your account</div>
+      <div class="settings-wrap">
+        <div class="card">
+          <div class="card-title">🔒 Change Password</div>
+          <div class="form-field"><label>Current Password</label><input type="password" id="pw-current" /></div>
+          <div class="form-field"><label>New Password</label><input type="password" id="pw-new" /></div>
+          <div class="form-field"><label>Confirm New Password</label><input type="password" id="pw-confirm" /></div>
+          <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Title</div>
+    <div class="modal-sub" id="modal-sub">Sub</div>
+    <div id="modal-body"></div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   BACKEND CONFIG
+   ══════════════════════════════════════════ */
+const API = 'https://script.google.com/macros/s/AKfycbwN8z_JgQdoAl6rlyMpTH102EHGspyP-u4C5CxnmOjPeGqqBUWHp8FgI_B9Z8-EKnNe/exec';
+
+/**
+ * GET request — append ?action=X&key=val
+ */
+async function apiGet(params = {}) {
+  const qs = new URLSearchParams({ ...params }).toString();
+  const res = await fetch(`${API}?${qs}`);
+  const json = await res.json();
+  return json;
+}
+
+/**
+ * POST request — JSON body
+ */
+async function apiPost(body = {}) {
+  const res = await fetch(API, {
+    method: 'POST',
+    // GAS requires text/plain for no-CORS; use mode:'no-cors' if needed
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(body),
+  });
+  // GAS returns JSON text
+  const text = await res.text();
+  try { return JSON.parse(text); } catch { return { ok: false, error: text }; }
+}
+
+/* ══════════════════════════════════════════
+   USERS (local — extend to GSheet if needed)
+   ══════════════════════════════════════════ */
+const USERS = {
+  student01: { pass: 'student123', role: 'student',  name: 'Juan dela Cruz',  initial: 'J' },
+  council01: { pass: 'council123', role: 'council',  name: 'Maria Santos',    initial: 'M' },
+  admin:     { pass: 'admin123',   role: 'admin',    name: 'Administrator',   initial: 'A' },
+};
+
+const NAV = {
+  student: [
+    { id:'home',      icon:'🏠', label:'Home' },
+    { id:'concern',   icon:'🔔', label:'Report a Concern' },
+    { id:'eval',      icon:'⭐', label:'Event Evaluation' },
+    { id:'adviser',   icon:'💬', label:'Talk to Adviser' },
+    { id:'council',   icon:'🏛', label:'Council Info' },
+    { id:'resources', icon:'📁', label:'Resources' },
+    { id:'settings',  icon:'⚙', label:'Settings' },
+  ],
+  council: [
+    { id:'home',         icon:'🏠', label:'Home' },
+    { id:'council-dash', icon:'📊', label:'Council Dashboard' },
+    { id:'eval',         icon:'⭐', label:'Event Evaluation' },
+    { id:'council',      icon:'🏛', label:'Council Info' },
+    { id:'resources',    icon:'📁', label:'Resources' },
+    { id:'settings',     icon:'⚙', label:'Settings' },
+  ],
+  admin: [
+    { id:'home',      icon:'🏠', label:'Home' },
+    { id:'admin',     icon:'🛠', label:'Admin Dashboard' },
+    { id:'concern',   icon:'🔔', label:'Report a Concern' },
+    { id:'council',   icon:'🏛', label:'Council Info' },
+    { id:'resources', icon:'📁', label:'Resources' },
+    { id:'settings',  icon:'⚙', label:'Settings' },
+  ],
+};
+
+const MEMBERS = [
+  { name:'Jodie Estrella',   role:'President',           i:'JE' },
+  { name:'Jones Sadiasa',    role:'Vice President',      i:'JS' },
+  { name:'Edriah Milaor',    role:'Secretary',           i:'EM' },
+  { name:'Soo Min Lee',      role:'Treasurer',           i:'SL' },
+  { name:'James Dacillo',    role:'Auditor',             i:'JD' },
+  { name:'Ashley Gado',      role:'Business Manager',    i:'AG' },
+  { name:'Rhian Siton',      role:'Internal P.R.O.',     i:'RS' },
+  { name:'Eleeyah Esguerra', role:'External P.R.O.',     i:'EE' },
+  { name:'Zna Soriano',      role:'ABM Representative',  i:'ZS' },
+  { name:'Hailey Oppus',     role:'HUMMS Representative',i:'HO' },
+  { name:'Mhikaela Bonayon', role:'STEM Representative', i:'MB' },
+  { name:'Winona Mercene',   role:'CUT Representative',  i:'WM' },
+  { name:'Sofia Santarin',   role:'JHS Representative',  i:'SS' },
+];
+
+const RESOURCES = [
+  { name:'SWC Constitution 2025',    desc:'Official student council constitution', icon:'📄', ext:'PDF' },
+  { name:'Concern Form Template',    desc:'Blank form for offline concerns',        icon:'📝', ext:'DOCX' },
+  { name:'Event Feedback Template',  desc:'Evaluation sheet for events',            icon:'📊', ext:'XLSX' },
+  { name:'SY 2026-27 Calendar',      desc:'Full academic year calendar',            icon:'📅', ext:'PDF' },
+  { name:'Permit Request Form',      desc:'Form for student activities',            icon:'📋', ext:'DOCX' },
+];
+
+let state = {
+  user: null,
+  posts: [],
+  concerns: [],
+  evals: [],
+  chats: { default: [{ from:'recv', text:'Hello! How can I help you today?', time:'Just now' }] },
+  starVal: 0,
+  pendingImgs: [],
+};
+
+/* ══════════════════════════════════════════
+   LOGIN
+   ══════════════════════════════════════════ */
+async function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const btn = document.getElementById('login-btn');
+  const errBanner = document.getElementById('login-err-banner');
+
+  if (!u || !p) { errBanner.classList.add('show'); return; }
+
+  errBanner.classList.remove('show');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Signing in…';
+
+  try {
+    // ── Authenticate against the "users" sheet ──
+    const res = await apiGet({ action: 'login', username: u, password: p });
+
+    if (res && res.ok) {
+      state.user = {
+        username: res.username,
+        role:     res.role,
+        name:     res.name,
+        initial:  res.initial,
+        pass:     p, // keep locally for change-password check
+      };
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      await initApp();
+    } else {
+      errBanner.classList.add('show');
+    }
+  } catch (err) {
+    // Fallback: if GSheet is unreachable, use local USERS object
+    console.warn('GSheet login failed, falling back to local auth:', err);
+    if (USERS[u] && USERS[u].pass === p) {
+      state.user = { ...USERS[u], username: u };
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      await initApp();
+    } else {
+      errBanner.classList.add('show');
+    }
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Sign In';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin();
+});
+
+function doLogout() {
+  state = { user:null, posts:[], concerns:[], evals:[], chats:{ default:[{ from:'recv', text:'Hello! How can I help you today?', time:'Just now' }] }, starVal:0, pendingImgs:[] };
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-err-banner').classList.remove('show');
+}
+
+/* ══════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════ */
+async function initApp() {
+  const u = state.user;
+  document.getElementById('top-avatar').textContent = u.initial;
+  document.getElementById('top-name').textContent = u.name;
+  document.getElementById('top-role').textContent = u.role === 'admin' ? 'Administrator' : u.role === 'council' ? 'Student Council' : 'Student';
+
+  // Build nav
+  const nav = document.getElementById('sidebar-nav');
+  nav.innerHTML = '';
+  NAV[u.role].forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-item' + (n.id === 'home' ? ' active' : '');
+    btn.innerHTML = `<span class="nav-icon">${n.icon}</span><span>${n.label}</span>`;
+    btn.onclick = () => navigate(n.id, btn);
+    nav.appendChild(btn);
+  });
+
+  if (u.role === 'admin' || u.role === 'council')
+    document.getElementById('announce-composer').classList.remove('hidden');
+
+  renderMembers();
+  renderResources();
+  initChat();
+  navigate('home');
+
+  // Load data from GSheet
+  await Promise.all([
+    loadPosts(),
+    loadConcerns(),
+    loadEvals(),
+  ]);
+}
+
+/* ══════════════════════════════════════════
+   NAVIGATION
+   ══════════════════════════════════════════ */
+function navigate(pageId, clickedBtn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const pg = document.getElementById('page-' + pageId);
+  if (pg) pg.classList.add('active');
+  if (clickedBtn) clickedBtn.classList.add('active');
+  else {
+    const icons = { home:'🏠', concern:'🔔', eval:'⭐', adviser:'💬', council:'🏛', resources:'📁', admin:'🛠', 'council-dash':'📊', settings:'⚙' };
+    document.querySelectorAll('.nav-item').forEach(b => {
+      if (b.querySelector('.nav-icon')?.textContent === (icons[pageId] || '')) b.classList.add('active');
+    });
+  }
+}
+
+/* ══════════════════════════════════════════
+   GSHEET — POSTS / ANNOUNCEMENTS
+   ══════════════════════════════════════════ */
+async function loadPosts() {
+  document.getElementById('feed-loading').style.display = 'block';
+  document.getElementById('posts-feed').innerHTML = '';
+  try {
+    const data = await apiGet({ action: 'getPosts' });
+    // Expected: { posts: [{id, author, initial, time, text, caption}] }
+    if (data && Array.isArray(data.posts)) {
+      state.posts = data.posts;
+    } else if (data && data.error) {
+      console.warn('GSheet getPosts error:', data.error);
+      // fallback to seeded posts
+      state.posts = [
+        { id:1, author:'Daphne Acena', initial:'D', time:'May 6, 2026 · 10:14 AM', text:'Welcome back, Lasallians! 🟢', imgs:[], caption:'' },
+        { id:2, author:'Daphne Acena', initial:'D', time:'May 3, 2026 · 2:00 PM',  text:'ANIMO Spear loves SC 💚', imgs:[], caption:'' },
+      ];
+    }
+  } catch (err) {
+    console.error('loadPosts failed', err);
+    toast('⚠ Could not load posts from Sheets.', true);
+    state.posts = [
+      { id:1, author:'Daphne Acena', initial:'D', time:'May 6, 2026 · 10:14 AM', text:'Welcome back, Lasallians! 🟢', imgs:[], caption:'' },
+    ];
+  }
+  document.getElementById('feed-loading').style.display = 'none';
+  renderPosts();
+  updateStats();
+}
+
+async function publishPost() {
+  const text = document.getElementById('post-text').value.trim();
+  const caption = document.getElementById('caption-input') ? document.getElementById('caption-input').value.trim() : '';
+  if (!text && state.pendingImgs.length === 0) { toast('Please write something or attach an image.'); return; }
+
+  const btn = document.getElementById('post-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Posting…';
+
+  const u = state.user;
+  const postData = {
+    action: 'addPost',
+    author: u.name,
+    initial: u.initial,
+    time: new Date().toLocaleString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' }),
+    text,
+    caption,
+    imgs: state.pendingImgs, // base64 strings — note: large images may exceed GAS limits
+    submittedBy: u.username,
+  };
+
+  try {
+    const res = await apiPost(postData);
+    if (res && res.ok) {
+      toast('✅ Announcement posted to Sheets!');
+    } else {
+      toast('⚠ Sheets sync issue — post saved locally.', true);
+    }
+  } catch (e) {
+    toast('⚠ Could not reach Sheets — saved locally.', true);
+  }
+
+  // Optimistic local update
+  state.posts.unshift({ id: Date.now(), author: u.name, initial: u.initial, time:'Just now', text, imgs:[...state.pendingImgs], caption });
+  document.getElementById('post-text').value = '';
+  document.getElementById('img-previews').innerHTML = '';
+  document.getElementById('post-imgs').value = '';
+  state.pendingImgs = [];
+  renderPosts(); updateStats();
+  btn.disabled = false; btn.innerHTML = '🚀 Post';
+}
+
+function previewImgs(input) {
+  const wrap = document.getElementById('img-previews');
+  wrap.innerHTML = '';
+  state.pendingImgs = [];
+  Array.from(input.files).forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      state.pendingImgs[i] = e.target.result;
+      const item = document.createElement('div');
+      item.className = 'img-preview-item';
+      item.innerHTML = `<img src="${e.target.result}"><button class="remove-img" onclick="removeImgAt(${i})">✕</button>`;
+      if (i === 0) {
+        const cap = document.createElement('input');
+        cap.className = 'caption-input'; cap.id = 'caption-input'; cap.placeholder = 'Add a caption…';
+        wrap.appendChild(item); wrap.appendChild(cap);
+      } else { wrap.insertBefore(item, wrap.lastChild); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function removeImgAt(i) { state.pendingImgs.splice(i,1); document.getElementById('img-previews').innerHTML=''; state.pendingImgs=[]; }
+
+function renderPosts() {
+  const feed = document.getElementById('posts-feed');
+  feed.innerHTML = '';
+  if (!state.posts.length) { feed.innerHTML = '<div class="empty-state">No announcements yet.</div>'; return; }
+  state.posts.forEach(p => {
+    const imgs = p.imgs || [];
+    const cls = imgs.length===1?'one':imgs.length===2?'two':imgs.length>2?'many':'';
+    const imgsHTML = imgs.length ? `<div class="post-images ${cls}">${imgs.map(src=>`<img src="${src}" loading="lazy">`).join('')}</div>` : '';
+    const capHTML  = p.caption ? `<div class="post-caption">📷 ${p.caption}</div>` : '';
+    feed.innerHTML += `
+      <div class="post-card">
+        <div class="post-header">
+          <div class="post-avatar">${p.initial||'?'}</div>
+          <div class="post-meta">
+            <div class="post-author">${p.author}</div>
+            <div class="post-time">${p.time}</div>
+          </div>
+        </div>
+        <div class="post-body">${p.text}</div>
+        ${imgsHTML}${capHTML}
+        <div class="post-footer"><span style="font-size:13px;color:var(--gray-400);">👍 Like &nbsp; 💬 Comment</span></div>
+      </div>`;
+  });
+}
+
+/* ══════════════════════════════════════════
+   GSHEET — CONCERNS
+   ══════════════════════════════════════════ */
+async function loadConcerns() {
+  try {
+    const data = await apiGet({ action: 'getConcerns' });
+    // Expected: { concerns: [{id, date, name, cat, urgency, body, status, user}] }
+    if (data && Array.isArray(data.concerns)) {
+      state.concerns = data.concerns;
+    }
+  } catch (e) {
+    console.error('loadConcerns failed', e);
+  }
+  renderConcernsAdmin();
+  renderCouncilConcerns();
+  renderMyConcerns();
+  updateStats();
+}
+
+async function submitConcern() {
+  const body = document.getElementById('c-body').value.trim();
+  if (!body) { toast('Please describe your concern.'); return; }
+
+  const btn = document.getElementById('concern-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+  const anon = document.getElementById('c-anon').value === 'yes';
+  const name = anon ? 'Anonymous' : (document.getElementById('c-name').value.trim() || state.user.name);
+  const entry = {
+    action: 'addConcern',
+    date: new Date().toLocaleDateString('en-PH'),
+    name, cat: document.getElementById('c-cat').value,
+    urgency: document.getElementById('c-urgency').value,
+    body, status: 'Open',
+    user: state.user.username,
+  };
+
+  try {
+    const res = await apiPost(entry);
+    if (res && res.ok) {
+      toast('✅ Concern submitted to Sheets!');
+      if (res.id) entry.id = res.id;
+    } else {
+      toast('⚠ Sheets sync issue — saved locally.', true);
+    }
+  } catch (e) {
+    toast('⚠ Could not reach Sheets — saved locally.', true);
+  }
+
+  // Optimistic
+  entry.id = entry.id || Date.now();
+  state.concerns.push(entry);
+  document.getElementById('c-body').value = '';
+  document.getElementById('c-name').value = '';
+  renderConcernsAdmin(); renderCouncilConcerns(); renderMyConcerns(); updateStats();
+  btn.disabled = false; btn.innerHTML = 'Submit Concern';
+}
+
+async function resolveConcern(id) {
+  const idx = state.concerns.findIndex(c => String(c.id) === String(id));
+  if (idx === -1) return;
+  state.concerns[idx].status = 'Resolved';
+  renderConcernsAdmin(); renderCouncilConcerns(); renderMyConcerns(); updateStats();
+
+  try {
+    await apiPost({ action: 'resolveConcern', id });
+    toast('✅ Concern marked as resolved in Sheets.');
+  } catch (e) {
+    toast('⚠ Local update done — Sheets sync failed.', true);
+  }
+}
+
+function renderMyConcerns() {
+  const tbody = document.getElementById('my-concerns-body');
+  const mine = state.concerns.filter(c => c.user === state.user?.username);
+  if (!mine.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No submissions yet.</td></tr>'; return; }
+  tbody.innerHTML = mine.map(c => `
+    <tr>
+      <td>${c.date}</td><td>${c.cat}</td>
+      <td><span class="badge-pill ${c.status==='Open'?'pill-yellow':'pill-green'}">${c.status}</span></td>
+      <td style="font-size:13px;color:var(--gray-600);">${(c.body||'').substring(0,50)}…</td>
+    </tr>`).join('');
+}
+
+function renderConcernsAdmin() {
+  const tbody = document.getElementById('admin-concerns-body');
+  if (!state.concerns.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No concerns yet.</td></tr>'; return; }
+  tbody.innerHTML = state.concerns.map(c => {
+    const urgCls = c.urgency==='High'?'pill-red':c.urgency==='Medium'?'pill-yellow':'pill-green';
+    const resolveBtn = c.status==='Open' ? `<button class="btn btn-sm btn-secondary" style="margin-left:4px" onclick="resolveConcern('${c.id}')">Resolve</button>` : '';
+    return `<tr>
+      <td>${c.date}</td><td>${c.name}</td><td>${c.cat}</td>
+      <td><span class="badge-pill ${urgCls}">${c.urgency}</span></td>
+      <td><span class="badge-pill ${c.status==='Open'?'pill-yellow':'pill-green'}">${c.status}</span></td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="viewConcern('${c.id}')">View</button>
+        ${resolveBtn}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCouncilConcerns() {
+  const tbody = document.getElementById('council-concerns-body');
+  if (!state.concerns.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No concerns yet.</td></tr>'; return; }
+  tbody.innerHTML = state.concerns.map(c => {
+    const resolveBtn = c.status==='Open' ? `<button class="btn btn-sm btn-secondary" style="margin-left:4px" onclick="resolveConcern('${c.id}')">Resolve</button>` : '';
+    return `<tr>
+      <td>${c.date}</td><td>${c.name}</td><td>${c.cat}</td>
+      <td><span class="badge-pill ${c.status==='Open'?'pill-yellow':'pill-green'}">${c.status}</span></td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="viewConcern('${c.id}')">View</button>
+        ${resolveBtn}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function viewConcern(id) {
+  const c = state.concerns.find(x => String(x.id) === String(id));
+  if (!c) return;
+  document.getElementById('modal-title').textContent = `${c.cat} Concern`;
+  document.getElementById('modal-sub').textContent = `By ${c.name} · ${c.date}`;
+  document.getElementById('modal-body').innerHTML = `
+    <p style="font-size:14px;line-height:1.7;color:var(--gray-800);">${c.body}</p>
+    <p style="margin-top:12px;font-size:13px;color:var(--gray-400);">Urgency: ${c.urgency} · Status: ${c.status}</p>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+/* ══════════════════════════════════════════
+   GSHEET — EVALUATIONS
+   ══════════════════════════════════════════ */
+async function loadEvals() {
+  try {
+    const data = await apiGet({ action: 'getEvals' });
+    // Expected: { evals: [{date, event, rating, comment, submittedBy}] }
+    if (data && Array.isArray(data.evals)) {
+      state.evals = data.evals;
+    }
+  } catch (e) {
+    console.error('loadEvals failed', e);
+  }
+  renderEvalsAdmin();
+  updateStats();
+}
+
+let starVal = 0;
+function setStar(v) {
+  starVal = v;
+  document.querySelectorAll('.star').forEach(s => s.classList.toggle('lit', +s.dataset.v <= v));
+}
+
+async function submitEval() {
+  if (!starVal) { toast('Please select a star rating.'); return; }
+  const btn = document.getElementById('eval-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+  const entry = {
+    action: 'addEval',
+    date: new Date().toLocaleDateString('en-PH'),
+    event: document.getElementById('ev-name').value,
+    rating: starVal,
+    comment: document.getElementById('ev-comment').value.trim(),
+    submittedBy: state.user.name,
+    user: state.user.username,
+  };
+
+  try {
+    const res = await apiPost(entry);
+    if (res && res.ok) {
+      toast('✅ Evaluation submitted to Sheets!');
+    } else {
+      toast('⚠ Sheets sync issue — saved locally.', true);
+    }
+  } catch (e) {
+    toast('⚠ Could not reach Sheets — saved locally.', true);
+  }
+
+  state.evals.push(entry);
+  setStar(0); document.getElementById('ev-comment').value = '';
+  renderEvalsAdmin(); updateStats();
+  btn.disabled = false; btn.innerHTML = 'Submit Evaluation';
+}
+
+function renderEvalsAdmin() {
+  const tbody = document.getElementById('admin-evals-body');
+  if (!state.evals.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No evaluations yet.</td></tr>'; return; }
+  tbody.innerHTML = state.evals.map(e => `
+    <tr>
+      <td>${e.date}</td><td>${e.event}</td>
+      <td>${'★'.repeat(e.rating)}${'☆'.repeat(5-e.rating)}</td>
+      <td style="font-size:13px;">${e.comment||'—'}</td>
+      <td style="font-size:13px;">${e.submittedBy||'—'}</td>
+    </tr>`).join('');
+}
+
+/* ══════════════════════════════════════════
+   REFRESH HELPERS (admin/council)
+   ══════════════════════════════════════════ */
+async function refreshAdmin() {
+  toast('🔄 Refreshing from Sheets…');
+  await Promise.all([loadPosts(), loadConcerns(), loadEvals()]);
+  toast('✅ Data refreshed!');
+}
+async function refreshCouncil() {
+  toast('🔄 Refreshing from Sheets…');
+  await Promise.all([loadConcerns(), loadEvals()]);
+  toast('✅ Data refreshed!');
+}
+
+/* ══════════════════════════════════════════
+   CHAT (local + simulated adviser reply)
+   ══════════════════════════════════════════ */
+const ADVISER_REPLIES = [
+  "Thank you for reaching out! I'll look into this.",
+  "Noted! I'll get back to you soon.",
+  "Great question! Let me check and reply.",
+  "Thanks for your message. We'll address this right away.",
+];
+function initChat() { renderChat(); }
+function renderChat() {
+  const win = document.getElementById('chat-window');
+  win.innerHTML = '';
+  state.chats.default.forEach(m => {
+    const b = document.createElement('div');
+    b.className = 'chat-bubble ' + m.from;
+    b.innerHTML = `${m.text}<div class="chat-meta">${m.time}</div>`;
+    win.appendChild(b);
+  });
+  win.scrollTop = win.scrollHeight;
+}
+function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const txt = inp.value.trim(); if (!txt) return;
+  const now = new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
+  state.chats.default.push({ from:'sent', text:txt, time:now });
+  inp.value = ''; renderChat();
+  setTimeout(() => {
+    state.chats.default.push({ from:'recv', text:ADVISER_REPLIES[Math.floor(Math.random()*ADVISER_REPLIES.length)], time:new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}) });
+    renderChat();
+  }, 1200);
+}
+
+/* ══════════════════════════════════════════
+   MEMBERS & RESOURCES
+   ══════════════════════════════════════════ */
+function renderMembers() {
+  document.getElementById('member-grid').innerHTML = MEMBERS.map(m => `
+    <div class="member-card">
+      <div class="member-avatar">${m.i}</div>
+      <div class="member-name">${m.name}</div>
+      <div class="member-role">${m.role}</div>
+    </div>`).join('');
+}
+function renderResources() {
+  document.getElementById('resource-list').innerHTML = RESOURCES.map(r => `
+    <div class="resource-item">
+      <div class="resource-icon">${r.icon}</div>
+      <div class="resource-info">
+        <div class="res-name">${r.name}</div>
+        <div class="res-desc">${r.desc}</div>
+      </div>
+      <button class="btn btn-secondary btn-sm res-dl" onclick="toast('Download started!')">⬇ ${r.ext}</button>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════
+   STATS
+   ══════════════════════════════════════════ */
+function updateStats() {
+  const open = state.concerns.filter(c=>c.status==='Open').length;
+  document.getElementById('stat-concerns').textContent = state.concerns.length;
+  document.getElementById('stat-evals').textContent    = state.evals.length;
+  document.getElementById('stat-posts').textContent    = state.posts.length;
+  const csc = document.getElementById('cs-stat-concerns');
+  const cse = document.getElementById('cs-stat-evals');
+  if (csc) csc.textContent = open;
+  if (cse) cse.textContent = state.evals.length;
+}
+
+/* ══════════════════════════════════════════
+   CHANGE PASSWORD
+   ══════════════════════════════════════════ */
+function changePassword() {
+  const cur = document.getElementById('pw-current').value;
+  const nw  = document.getElementById('pw-new').value;
+  const cf  = document.getElementById('pw-confirm').value;
+  if (cur !== state.user.pass) { toast('⚠ Current password is incorrect.', true); return; }
+  if (nw.length < 6) { toast('⚠ New password must be at least 6 characters.', true); return; }
+  if (nw !== cf) { toast('⚠ Passwords do not match.', true); return; }
+  state.user.pass = nw; if (USERS[state.user.username]) USERS[state.user.username].pass = nw;
+  document.getElementById('pw-current').value='';
+  document.getElementById('pw-new').value='';
+  document.getElementById('pw-confirm').value='';
+  toast('✅ Password updated!');
+}
+
+/* ══════════════════════════════════════════
+   ADMIN TABS
+   ══════════════════════════════════════════ */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+/* ══════════════════════════════════════════
+   MODAL
+   ══════════════════════════════════════════ */
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target===document.getElementById('modal')) closeModal(); });
+
+/* ══════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════ */
+let toastTimer;
+function toast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('error', isError);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
